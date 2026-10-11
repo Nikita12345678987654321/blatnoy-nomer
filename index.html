@@ -2343,36 +2343,41 @@ body.police-lights::after{
 
     <!-- Bio Modal -->
     <!-- Leaderboard Modal -->
-    <div id="lb-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:500;align-items:center;justify-content:center;padding:20px;" onclick="closeLB()">
-        <div style="background:rgba(14,14,20,0.97);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:24px;max-width:460px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,0.8);" onclick="event.stopPropagation()">
+    <div id="lb-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:900;align-items:center;justify-content:center;padding:20px;" onclick="closeLB()">
+        <div style="background:rgba(14,14,20,0.97);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:22px;max-width:440px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,0.8);position:relative;z-index:901;" onclick="event.stopPropagation()">
+
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
                 <div style="font-family:'Russo One',sans-serif;font-size:18px;color:var(--gold);letter-spacing:2px;">🏅 РЕКОРДЫ</div>
                 <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Блатные серии</div>
             </div>
-            <div id="lb-my-row" style="background:rgba(245,197,24,0.08);border:1px solid rgba(245,197,24,0.3);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
-                <div style="font-family:'Russo One',sans-serif;font-size:20px;color:var(--gold);width:32px;text-align:center;">👑</div>
-                <div style="flex:1;">
-                    <div style="font-family:'Oswald',sans-serif;font-size:15px;color:var(--white);font-weight:700;" id="lb-my-name">Ты</div>
-                    <div style="font-size:11px;color:var(--muted);" id="lb-my-sub">Всего прокруток: 0</div>
+
+            <!-- Карточка игрока с аватаркой -->
+            <div id="lb-my-row" style="background:rgba(245,197,24,0.08);border:1px solid rgba(245,197,24,0.3);border-radius:12px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+                <div style="position:relative;width:42px;height:42px;flex-shrink:0;">
+                    <img id="lb-my-avatar" src="" style="width:42px;height:42px;border-radius:10px;object-fit:cover;border:1px solid rgba(245,197,24,0.4);display:none;">
+                    <div id="lb-my-avatar-fallback" style="font-family:'Russo One',sans-serif;font-size:22px;color:var(--gold);text-align:center;line-height:42px;">👑</div>
                 </div>
-                <div style="text-align:right;">
+                <div style="flex:1;min-width:0;">
+                    <div style="font-family:'Oswald',sans-serif;font-size:15px;color:var(--white);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="lb-my-name">Ты</div>
+                    <div style="font-size:11px;color:var(--muted);" id="lb-my-sub">Круток: 0 · Продано: 0</div>
+                </div>
+                <div style="text-align:right;flex-shrink:0;">
                     <div style="font-family:'Russo One',sans-serif;font-size:20px;color:var(--gold);" id="lb-my-score">0</div>
                     <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">спецсерий</div>
                 </div>
             </div>
-            <div style="display:flex;gap:8px;margin-bottom:14px;position:relative;z-index:20;">
-                <button type="button" onclick="shareMyRecord()" style="flex:1;padding:12px 8px;border-radius:8px;border:1px solid rgba(245,197,24,0.4);background:rgba(245,197,24,0.14);color:var(--gold);font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px;cursor:pointer;font-weight:700;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
-                    📢 НА СТЕНУ
+
+            <!-- Кнопки действий -->
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+                <button id="btn-lb-wall" type="button" style="width:100%;padding:13px;border-radius:10px;border:1px solid rgba(245,197,24,0.4);background:rgba(245,197,24,0.15);color:var(--gold);font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:1px;cursor:pointer;font-weight:700;text-transform:uppercase;">
+                    📢 Опубликовать рекорд на стену
                 </button>
-                <button type="button" onclick="inviteFriendChallenge()" style="flex:1;padding:12px 8px;border-radius:8px;border:1px solid rgba(58,143,232,0.4);background:rgba(58,143,232,0.14);color:var(--blue);font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px;cursor:pointer;font-weight:700;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
-                    ✉️ ВЫЗВАТЬ ДРУГА
+                <button id="btn-lb-share" type="button" style="width:100%;padding:13px;border-radius:10px;border:1px solid rgba(58,143,232,0.4);background:rgba(58,143,232,0.15);color:var(--blue);font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:1px;cursor:pointer;font-weight:700;text-transform:uppercase;">
+                    ✉️ Отправить вызов другу
                 </button>
             </div>
-            <div style="font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Друзья:</div>
-            <div id="lb-list" style="display:flex;flex-direction:column;gap:6px;">
-                <div style="text-align:center;color:var(--muted);font-size:13px;padding:20px;">Загрузка...</div>
-            </div>
-            <button onclick="closeLB()" style="width:100%;margin-top:16px;padding:12px;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--muted);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;">✕ ЗАКРЫТЬ</button>
+
+            <button type="button" onclick="closeLB()" style="width:100%;padding:11px;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--muted);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;">✕ ЗАКРЫТЬ</button>
         </div>
     </div>
 
@@ -3848,72 +3853,72 @@ async function loadLeaderboard() {
   if (myScore) myScore.textContent = specCount;
   if (mySub) mySub.textContent = `Круток: ${totSpins} · Продано: ${S.sellCount || 0}`;
 
-  const listEl = document.getElementById('lb-list');
+  const myAvatar = document.getElementById('lb-my-avatar');
+  const myFallback = document.getElementById('lb-my-avatar-fallback');
+  const avatarUrl = user?.photo_200 || user?.photo_100;
 
-  if (typeof vkBridge === 'undefined') {
-    listEl.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:12px;">Запустите игру в приложении ВКонтакте, чтобы видеть друзей.</div>';
-    return;
+  if (myAvatar && avatarUrl) {
+    myAvatar.src = avatarUrl;
+    myAvatar.style.display = 'block';
+    if (myFallback) myFallback.style.display = 'none';
   }
 
-  listEl.innerHTML = `
-    <div style="background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.12);border-radius:10px;padding:14px;text-align:center;">
-      <div style="font-size:13px;color:var(--white);margin-bottom:6px;">Сравни свои номера с друзьями!</div>
-      <div style="font-size:11px;color:var(--muted);line-height:1.4;margin-bottom:12px;">
-        Вызови друзей, чтобы узнать, кто быстрее выбьет 777 или АМР!
-      </div>
-      <button onclick="inviteFriendChallenge()" style="padding:8px 16px;border-radius:8px;border:none;background:var(--gold);color:#111;font-family:'Oswald',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;">
-        ПРИГЛАСИТЬ ДРУЗЕЙ
-      </button>
-    </div>
-  `;
+  // Привязываем обработчики напрямую к элементам (чтобы клик 100% работал на тачскринах)
+  const btnWall = document.getElementById('btn-lb-wall');
+  const btnShare = document.getElementById('btn-lb-share');
+
+  if (btnWall) {
+    btnWall.onclick = (e) => { e.stopPropagation(); shareMyRecord(); };
+  }
+  if (btnShare) {
+    btnShare.onclick = (e) => { e.stopPropagation(); inviteFriendChallenge(); };
+  }
 }
 
+// 1. Пост на стену (текст в ВК ПОДСТАВЛЯЕТСЯ АВТОМАТИЧЕСКИ)
 async function shareMyRecord() {
   if (typeof vkBridge === 'undefined') {
     toast('Доступно только внутри ВК!');
     return;
   }
-  const spec = S.stats.special || 0;
+  const APP_ID = '54766294';
+  const appUrl = `https://vk.com/app${APP_ID}`;
+  const spec = (S.stats && S.stats.special) || 0;
   const best = S.bestSell || 0;
+  const msg = `У меня уже ${spec} блатных спецсерий в игре «Выбей Блатной Номер: Автопарк»! Мой рекорд продажи — ${best} монет. Попробуй перебить мой автопарк: ${appUrl}`;
+
   try {
     await vkBridge.send('VKWebAppShowWallPostBox', {
-      message: `У меня уже ${spec} блатных спецсерий в игре «Выбей Блатной Номер: Автопарк»! Мой лучший номер ушел за ${best} монет. Сможешь перебить мой гараж? 😎`
+      message: msg,
+      attachments: appUrl
     });
     toast('Запись опубликована!');
   } catch(e) {}
 }
 
+// 2. Отправка другу: шеринг ссылки + автокопирование текста в буфер
 async function inviteFriendChallenge() {
   if (typeof vkBridge === 'undefined') {
     toast('Доступно только внутри ВК!');
     return;
   }
-
   const APP_ID = '54766294';
   const appUrl = `https://vk.com/app${APP_ID}`;
   const spec = (S.stats && S.stats.special) || 0;
-  const msg = `Я выбил уже ${spec} блатных серий в игре «Выбей Блатной Номер: Автопарк»! Попробуй перебить мой рекорд:`;
+  const msg = `Я выбил уже ${spec} блатных серий в игре «Выбей Блатной Номер: Автопарк»! Попробуй перебить мой рекорд: ${appUrl}`;
 
-  // Официальный диалог шеринга ВК — в нём текст подставляется автоматически в поле
-  const shareLink = `https://vk.com/share.php?url=${encodeURIComponent(appUrl)}&title=${encodeURIComponent(msg)}`;
-
+  // Копируем готовый текст в буфер обмена игроку
   try {
-    // 1. Открываем окно отправки с уже готовым вписанным текстом и ссылкой
-    await vkBridge.send('VKWebAppOpenUrl', { url: shareLink });
-    return;
-  } catch (e) {
-    // 2. Если браузер заблокировал переход, пробуем стандартный Share
-    try {
-      await vkBridge.send('VKWebAppShare', { link: appUrl });
-      return;
-    } catch (err) {}
+    await vkBridge.send('VKWebAppCopyText', { text: msg });
+  } catch(err) {}
+
+  // Открываем нативный выбор диалога
+  try {
+    await vkBridge.send('VKWebAppShare', { link: appUrl });
+    toast('Текст вызова скопирован! Можешь вставить его в чат.');
+  } catch(e) {
+    toast('Текст вызова скопирован в буфер!');
   }
-
-  // 3. Фолбэк — копируем готовый текст в буфер
-  try {
-    await vkBridge.send('VKWebAppCopyText', { text: `${msg} ${appUrl}` });
-    toast('Ссылка и текст вызова скопированы в буфер!');
-  } catch (err) {}
 }
 
 function submitLBScore() {}
