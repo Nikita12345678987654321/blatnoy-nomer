@@ -2360,11 +2360,11 @@ body.police-lights::after{
                     <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">спецсерий</div>
                 </div>
             </div>
-            <div style="display:flex;gap:8px;margin-bottom:14px;">
-                <button onclick="shareMyRecord()" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(245,197,24,0.4);background:rgba(245,197,24,0.12);color:var(--gold);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;cursor:pointer;font-weight:700;">
+            <div style="display:flex;gap:8px;margin-bottom:14px;position:relative;z-index:20;">
+                <button type="button" onclick="shareMyRecord()" style="flex:1;padding:12px 8px;border-radius:8px;border:1px solid rgba(245,197,24,0.4);background:rgba(245,197,24,0.14);color:var(--gold);font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px;cursor:pointer;font-weight:700;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
                     📢 НА СТЕНУ
                 </button>
-                <button onclick="inviteFriendChallenge()" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(58,143,232,0.4);background:rgba(58,143,232,0.12);color:var(--blue);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;cursor:pointer;font-weight:700;">
+                <button type="button" onclick="inviteFriendChallenge()" style="flex:1;padding:12px 8px;border-radius:8px;border:1px solid rgba(58,143,232,0.4);background:rgba(58,143,232,0.14);color:var(--blue);font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px;cursor:pointer;font-weight:700;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
                     ✉️ ВЫЗВАТЬ ДРУГА
                 </button>
             </div>
@@ -3889,31 +3889,31 @@ async function inviteFriendChallenge() {
     return;
   }
 
-  const APP_ID = '54766294'; // укажи цифры ID
+  const APP_ID = '54766294';
   const appUrl = `https://vk.com/app${APP_ID}`;
   const spec = (S.stats && S.stats.special) || 0;
-  const text = `Я выбил уже ${spec} блатных серий в игре «Выбей Блатной Номер: Автопарк»! Попробуй перебить мой рекорд: ${appUrl}`;
+  const msg = `Я выбил уже ${spec} блатных серий в игре «Выбей Блатной Номер: Автопарк»! Попробуй перебить мой рекорд:`;
+
+  // Официальный диалог шеринга ВК — в нём текст подставляется автоматически в поле
+  const shareLink = `https://vk.com/share.php?url=${encodeURIComponent(appUrl)}&title=${encodeURIComponent(msg)}`;
 
   try {
-    // 1. Метод отправки сообщения другу напрямую через окно диалога ВК
-    await vkBridge.send('VKWebAppSendMessage', {
-      action: 'message',
-      message: text
-    });
+    // 1. Открываем окно отправки с уже готовым вписанным текстом и ссылкой
+    await vkBridge.send('VKWebAppOpenUrl', { url: shareLink });
+    return;
   } catch (e) {
-    // 2. Если платформа не поддержала SendMessage, открываем диалог шеринга
+    // 2. Если браузер заблокировал переход, пробуем стандартный Share
     try {
-      await vkBridge.send('VKWebAppShare', {
-        link: appUrl
-      });
-    } catch (err) {
-      // 3. Крайний фолбэк: копируем в буфер обмена
-      try {
-        await vkBridge.send('VKWebAppCopyText', { text: text });
-        toast('Текст скопирован! Вставь его в диалог.');
-      } catch (cErr) {}
-    }
+      await vkBridge.send('VKWebAppShare', { link: appUrl });
+      return;
+    } catch (err) {}
   }
+
+  // 3. Фолбэк — копируем готовый текст в буфер
+  try {
+    await vkBridge.send('VKWebAppCopyText', { text: `${msg} ${appUrl}` });
+    toast('Ссылка и текст вызова скопированы в буфер!');
+  } catch (err) {}
 }
 
 function submitLBScore() {}
