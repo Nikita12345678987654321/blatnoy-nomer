@@ -3889,28 +3889,25 @@ async function inviteFriendChallenge() {
     return;
   }
 
-  // Получаем ссылку на текущую игру
-  const appUrl = window.location.href;
+  // ⚠️ УКАЖИ ЗДЕСЬ СВОЙ ID ПРИЛОЖЕНИЯ ИЗ НАСТРОЕК ВК:
+  const APP_ID = '54766294'; // например, '51842345'
+  
+  // Официальная ссылка на открытие игры в ВК:
+  const appUrl = `https://vk.com/app${APP_ID}`;
   const spec = (S.stats && S.stats.special) || 0;
-  const shareText = `Я выбил уже ${spec} блатных серий в автопарке! Попробуй перебить мой рекорд:`;
+  const shareText = `Я выбил уже ${spec} блатных серий в игре «Выбей Блатной Номер: Автопарк»! Попробуй перебить мой рекорд:`;
 
   try {
-    // Пробуем универсальный шеринг (отправка в диалоги / чаты)
     await vkBridge.send('VKWebAppShare', {
       link: appUrl
     });
   } catch(e) {
-    // Фолбэк: если не сработало, открываем стандартный InviteBox
+    // Если шеринг закрыли или не сработал — копируем красивую ссылку
     try {
-      await vkBridge.send('VKWebAppShowInviteBox');
-    } catch(err) {
-      // Если и инвайты заблочены, копируем ссылку в буфер
-      try {
-        await vkBridge.send('VKWebAppCopyText', { text: `${shareText} ${appUrl}` });
-        toast('Ссылка на вызов скопирована!');
-      } catch(cErr) {
-        toast('Не удалось отправить вызов');
-      }
+      await vkBridge.send('VKWebAppCopyText', { text: `${shareText} ${appUrl}` });
+      toast('Ссылка на игру скопирована!');
+    } catch(cErr) {
+      toast('Не удалось отправить вызов');
     }
   }
 }
