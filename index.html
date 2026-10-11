@@ -3813,74 +3813,49 @@ async function loadLeaderboard() {
   const listEl = document.getElementById('lb-list');
   listEl.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px;">Загрузка...</div>';
 
-  // Отправляем счёт и получаем таблицу параллельно, с таймаутом 8 сек
-  const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 8000));
-
-  let data = null;
   try {
-    const [_, lb] = await Promise.all([
-      YaSDK.submitScore(LB_NAME, S.stats.special || 0).catch(() => {}),
-      Promise.race([
-        YaSDK.getLeaderboard(LB_NAME, { quantityTop: 10, quantityAround: 3 }),
-        timeout,
-      ]),
-    ]);
-    data = lb;
-  } catch(e) {
-    console.warn('[LB] load error:', e);
-  }
+    if (typeof vkBridge === 'undefined') {
+      throw new Error('No VK');
+    }
 
-  if (!data) {
-    listEl.innerHTML = renderLBLocal();
-    return;
-  }
+    // Запрашиваем друзей игрока, которые запустили игру
+    const data = await vkBridge.send('VKWebAppGetFriends', { filter: 'in_app' });
+    
+    if (!data.users || data.users.length === 0) {
+      listEl.innerHTML = `
+        <div style="text-align:center;padding:20px;">
+          <div style="font-size:32px;margin-bottom:8px;">🏅</div>
+          <div style="font-family:'Oswald',sans-serif;font-size:14px;color:var(--muted);letter-spacing:1px;">ТАБЛИЦА ЛИДЕРОВ ВК</div>
+          <div style="margin-top:10px;font-family:'Oswald',sans-serif;font-size:13px;color:var(--white);">Твой результат: <span style="color:var(--gold)">${(S.stats.special||0)} спецсерий</span></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px;">Среди друзей пока нет игроков.</div>
+        </div>`;
+      return;
+    }
 
-  // Своя строка
-  if (data.userRank) {
-    const myRow = document.getElementById('lb-my-row');
-    myRow.style.display = 'flex';
-    document.getElementById('lb-my-rank').textContent  = `#${data.userRank}`;
-    document.getElementById('lb-my-score').textContent = (S.stats.special || 0).toLocaleString('ru');
-  }
-
-  // Топ игроков
-  const entries = data.entries || [];
-  if (!entries.length) {
-    listEl.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px;">Таблица пуста — будь первым!</div>';
-    return;
-  }
-
-  listEl.innerHTML = entries.map(e => {
-    const rank   = e.rank;
-    const name   = e.player?.publicName || 'Игрок';
-    const score  = e.score || 0;
-    const avatar = e.player?.getAvatarSrc?.('small') || '';
-    const isTop3 = rank <= 3;
-    const medal  = ['🥇','🥈','🥉'][rank - 1] || '';
-    return `
+    listEl.innerHTML = data.users.map((user, index) => `
       <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);">
-        <div style="font-family:'Russo One',sans-serif;font-size:${isTop3?'20':'14'}px;color:${isTop3?'var(--gold)':'var(--muted)'};width:28px;text-align:center;">${medal || '#'+rank}</div>
-        ${avatar ? `<img src="${avatar}" style="width:32px;height:32px;border-radius:8px;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">` : ''}
-        <div style="flex:1;font-family:'Oswald',sans-serif;font-size:14px;color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</div>
-        <div style="font-family:'Oswald',sans-serif;font-size:17px;font-weight:700;color:var(--gold);">${score.toLocaleString('ru')} 🌟</div>
-      </div>`;
-  }).join('');
+        <div style="font-family:'Russo One',sans-serif;font-size:14px;color:var(--muted);width:28px;text-align:center;">#${index + 1}</div>
+        <img src="${user.photo_200 || user.photo_100 || ''}" style="width:32px;height:32px;border-radius:8px;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">
+        <div style="flex:1;font-family:'Oswald',sans-serif;font-size:14px;color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${user.first_name} ${user.last_name}</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:15px;font-weight:700;color:var(--gold);">Игрок</div>
+      </div>`).join('');
+
+  } catch(e) {
+    listEl.innerHTML = renderLBLocal();
+  }
 }
 
 function renderLBLocal() {
-  // Заглушка для локального режима
   return `
     <div style="text-align:center;padding:20px;">
       <div style="font-size:32px;margin-bottom:8px;">🏅</div>
-      <div style="font-family:'Oswald',sans-serif;font-size:14px;color:var(--muted);letter-spacing:1px;">Таблица доступна на Яндекс Играх</div>
-      <div style="margin-top:10px;font-family:'Oswald',sans-serif;font-size:12px;color:var(--muted);">Твой результат: <span style="color:var(--gold)">${(S.stats.special||0)} спецсерий</span></div>
+      <div style="font-family:'Oswald',sans-serif;font-size:14px;color:var(--muted);letter-spacing:1px;">ТАБЛИЦА ЛИДЕРОВ ВКОНТАКТЕ</div>
+      <div style="margin-top:10px;font-family:'Oswald',sans-serif;font-size:13px;color:var(--muted);">Твой результат: <span style="color:var(--gold)">${(S.stats.special||0)} спецсерий</span></div>
     </div>`;
 }
 
-// Отправляем счёт после каждой спецсерии
-function submitLBScore() {
-  YaSDK.submitScore(LB_NAME, S.stats.special || 0).catch(()=>{});
-}
+// Заглушка отправки очков (чтобы код не падал при вызове)
+function submitLBScore() {}
 
 function resetIdleTimer() {
   clearTimeout(_idleTimer);
