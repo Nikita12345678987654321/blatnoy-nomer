@@ -3875,25 +3875,25 @@ async function loadLeaderboard() {
   }
 }
 
-// 1. Пост на стену (текст в ВК ПОДСТАВЛЯЕТСЯ АВТОМАТИЧЕСКИ)
-async function shareMyRecord() {
-  if (typeof vkBridge === 'undefined') {
-    toast('Доступно только внутри ВК!');
-    return;
-  }
+// 1. Пост на стену / шеринг рекорда (текст подставляется АВТОМАТИЧЕСКИ)
+function shareMyRecord() {
   const APP_ID = '54766294';
   const appUrl = `https://vk.com/app${APP_ID}`;
   const spec = (S.stats && S.stats.special) || 0;
   const best = S.bestSell || 0;
-  const msg = `У меня уже ${spec} блатных спецсерий в игре «Выбей Блатной Номер: Автопарк»! Мой рекорд продажи — ${best} монет. Попробуй перебить мой автопарк: ${appUrl}`;
+  const msg = `У меня уже ${spec} блатных спецсерий в игре «Выбей Блатной Номер: Автопарк»! Мой рекорд продажи — ${best} монет. Попробуй перебить мой автопарк!`;
 
-  try {
-    await vkBridge.send('VKWebAppShowWallPostBox', {
-      message: msg,
-      attachments: appUrl
-    });
-    toast('Запись опубликована!');
-  } catch(e) {}
+  // Формируем прямую ссылку на окно шеринга ВК, куда текст впечатывается платформой
+  const shareUrl = `https://vk.com/share.php?url=${encodeURIComponent(appUrl)}&title=${encodeURIComponent(msg)}`;
+
+  if (typeof vkBridge !== 'undefined') {
+    vkBridge.send('VKWebAppOpenUrl', { url: shareUrl })
+      .catch(() => {
+        window.open(shareUrl, '_blank');
+      });
+  } else {
+    window.open(shareUrl, '_blank');
+  }
 }
 
 // 2. Отправка другу: шеринг ссылки + автокопирование текста в буфер
