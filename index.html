@@ -3888,9 +3888,31 @@ async function inviteFriendChallenge() {
     toast('Доступно только внутри ВК!');
     return;
   }
+
+  // Получаем ссылку на текущую игру
+  const appUrl = window.location.href;
+  const spec = (S.stats && S.stats.special) || 0;
+  const shareText = `Я выбил уже ${spec} блатных серий в автопарке! Попробуй перебить мой рекорд:`;
+
   try {
-    await vkBridge.send('VKWebAppShowInviteBox');
-  } catch(e) {}
+    // Пробуем универсальный шеринг (отправка в диалоги / чаты)
+    await vkBridge.send('VKWebAppShare', {
+      link: appUrl
+    });
+  } catch(e) {
+    // Фолбэк: если не сработало, открываем стандартный InviteBox
+    try {
+      await vkBridge.send('VKWebAppShowInviteBox');
+    } catch(err) {
+      // Если и инвайты заблочены, копируем ссылку в буфер
+      try {
+        await vkBridge.send('VKWebAppCopyText', { text: `${shareText} ${appUrl}` });
+        toast('Ссылка на вызов скопирована!');
+      } catch(cErr) {
+        toast('Не удалось отправить вызов');
+      }
+    }
+  }
 }
 
 function submitLBScore() {}
