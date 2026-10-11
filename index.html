@@ -3884,35 +3884,35 @@ async function shareMyRecord() {
 }
 
 async function inviteFriendChallenge() {
-  if (typeof vkBridge !== 'undefined') {
-    // Твой ID приложения ВК
-    const APP_ID = 'ТВОЙ_ID_ИГРЫ'; // укажи цифры своего ID
-    const appUrl = `https://vk.com/app${APP_ID}`;
-    const spec = (S.stats && S.stats.special) || 0;
-    const msg = `Я выбил уже ${spec} блатных серий в игре «Выбей Блатной Номер: Автопарк»! Попробуй перебить мой рекорд: ${appUrl}`;
-
-    try {
-      // 1. Метод отправки готового сообщения в диалог (с текстом и ссылкой)
-      await vkBridge.send('VKWebAppSendMessage', {
-        action: 'message',
-        message: msg
-      });
-      return;
-    } catch(e) {
-      // 2. Если пользователь закрыл или метод недоступен, пробуем шеринг ссылки
-      try {
-        await vkBridge.send('VKWebAppShare', { link: appUrl });
-        return;
-      } catch(err) {}
-    }
-
-    // 3. Фолбэк — копируем текст в буфер
-    try {
-      await vkBridge.send('VKWebAppCopyText', { text: msg });
-      toast('Текст с рекордом скопирован в буфер!');
-    } catch(err) {}
-  } else {
+  if (typeof vkBridge === 'undefined') {
     toast('Доступно только внутри ВК!');
+    return;
+  }
+
+  const APP_ID = 'ТВОЙ_ID_ИГРЫ'; // укажи цифры ID
+  const appUrl = `https://vk.com/app${APP_ID}`;
+  const spec = (S.stats && S.stats.special) || 0;
+  const text = `Я выбил уже ${spec} блатных серий в игре «Выбей Блатной Номер: Автопарк»! Попробуй перебить мой рекорд: ${appUrl}`;
+
+  try {
+    // 1. Метод отправки сообщения другу напрямую через окно диалога ВК
+    await vkBridge.send('VKWebAppSendMessage', {
+      action: 'message',
+      message: text
+    });
+  } catch (e) {
+    // 2. Если платформа не поддержала SendMessage, открываем диалог шеринга
+    try {
+      await vkBridge.send('VKWebAppShare', {
+        link: appUrl
+      });
+    } catch (err) {
+      // 3. Крайний фолбэк: копируем в буфер обмена
+      try {
+        await vkBridge.send('VKWebAppCopyText', { text: text });
+        toast('Текст скопирован! Вставь его в диалог.');
+      } catch (cErr) {}
+    }
   }
 }
 
