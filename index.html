@@ -3884,31 +3884,35 @@ async function shareMyRecord() {
 }
 
 async function inviteFriendChallenge() {
-  if (typeof vkBridge === 'undefined') {
-    toast('Доступно только внутри ВК!');
-    return;
-  }
+  if (typeof vkBridge !== 'undefined') {
+    // Твой ID приложения ВК
+    const APP_ID = 'ТВОЙ_ID_ИГРЫ'; // укажи цифры своего ID
+    const appUrl = `https://vk.com/app${APP_ID}`;
+    const spec = (S.stats && S.stats.special) || 0;
+    const msg = `Я выбил уже ${spec} блатных серий в игре «Выбей Блатной Номер: Автопарк»! Попробуй перебить мой рекорд: ${appUrl}`;
 
-  // ⚠️ УКАЖИ ЗДЕСЬ СВОЙ ID ПРИЛОЖЕНИЯ ИЗ НАСТРОЕК ВК:
-  const APP_ID = '54766294'; // например, '51842345'
-  
-  // Официальная ссылка на открытие игры в ВК:
-  const appUrl = `https://vk.com/app${APP_ID}`;
-  const spec = (S.stats && S.stats.special) || 0;
-  const shareText = `Я выбил уже ${spec} блатных серий в игре «Выбей Блатной Номер: Автопарк»! Попробуй перебить мой рекорд:`;
-
-  try {
-    await vkBridge.send('VKWebAppShare', {
-      link: appUrl
-    });
-  } catch(e) {
-    // Если шеринг закрыли или не сработал — копируем красивую ссылку
     try {
-      await vkBridge.send('VKWebAppCopyText', { text: `${shareText} ${appUrl}` });
-      toast('Ссылка на игру скопирована!');
-    } catch(cErr) {
-      toast('Не удалось отправить вызов');
+      // 1. Метод отправки готового сообщения в диалог (с текстом и ссылкой)
+      await vkBridge.send('VKWebAppSendMessage', {
+        action: 'message',
+        message: msg
+      });
+      return;
+    } catch(e) {
+      // 2. Если пользователь закрыл или метод недоступен, пробуем шеринг ссылки
+      try {
+        await vkBridge.send('VKWebAppShare', { link: appUrl });
+        return;
+      } catch(err) {}
     }
+
+    // 3. Фолбэк — копируем текст в буфер
+    try {
+      await vkBridge.send('VKWebAppCopyText', { text: msg });
+      toast('Текст с рекордом скопирован в буфер!');
+    } catch(err) {}
+  } else {
+    toast('Доступно только внутри ВК!');
   }
 }
 
